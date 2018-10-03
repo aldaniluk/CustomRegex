@@ -415,17 +415,13 @@ namespace CustomRegex
 
         private bool IsPassedStringThroughDfa(string str, DfaNode dfaNode)
         {
-            if (str.Length == 0 && dfaNode.IsFinal)
+            if (str.Length == 0)
             {
-                return true;
+                return dfaNode.IsFinal;
             }
 
             foreach (DfaNodeLink childNode in dfaNode.Links)
             {
-                if (str.Length == 0)
-                {
-                    return false;
-                }
                 if (childNode.LinkValue == str.First())
                 {
                     bool isMatched = IsPassedStringThroughDfa(str.Substring(1, str.Length - 1), childNode.DfaNode);
