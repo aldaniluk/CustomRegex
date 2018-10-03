@@ -1,6 +1,6 @@
-a a aaa b
-ab ab a b abb
-(a|b) a b ab aa
-ab* ab abbb aabb aab
-(a|b)* aabb bbbabababbabab aavbb
-ab*(cd|de)* acd abbbde acdde abcde
+ab a b ab ababab
+a* a aa aaa b b ab
+a*b* ab ba aaa bbb aba
+(ab)* ab aab aaabbb ababa
+(aa|bb)* abab aabb bb bbaa bbaabb bbabb
+((aa|bb)(cc)*)* abab aacc aaccbbcc abc 

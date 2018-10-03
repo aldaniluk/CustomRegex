@@ -281,8 +281,7 @@ namespace CustomRegex
         public DfaNode GetDfa(NfaNode nfaNode)
         {
             DfaNode firstDfaNode = GetFirstDfaNode(nfaNode);
-            NfaNode lastNfaNode = GetLastNfaNode(nfaNode);
-            BuildDfaInternal(firstDfaNode, lastNfaNode, new List<DfaNode> { firstDfaNode });
+            BuildDfaInternal(firstDfaNode, new List<DfaNode> { firstDfaNode });
             MarkIsFinal(firstDfaNode, nfaNode);
 
             return firstDfaNode;
@@ -292,39 +291,35 @@ namespace CustomRegex
         {
             var dfaNode = new DfaNode();
             dfaNode.NfaNodes = GetValuesFromNfaNode(nfaNode, c => c == EPS, nfaL => nfaL.NfaNode,
-                values: new List<NfaNode> { nfaNode });
+                values: new List<NfaNode> { nfaNode }).Distinct().ToList();
 
             return dfaNode;
         }
 
-        private void BuildDfaInternal(DfaNode dfaNode, NfaNode lastNfaNode, List<DfaNode> previous)
+        private void BuildDfaInternal(DfaNode dfaNode, List<DfaNode> previous)
         {
             List<char> values = GetValuesFromNfaNodes(dfaNode.NfaNodes, c => c != EPS, nfaL => nfaL.LinkValue);
 
             foreach (char value in values)
             {
                 var newDfaNode = new DfaNode();
-                previous.Add(newDfaNode);
+
                 newDfaNode.NfaNodes = GetValuesFromNfaNodes(dfaNode.NfaNodes, c => c == value,
                     nfaL => nfaL.NfaNode, addEpsCondition: true).Distinct().ToList();
 
-                dfaNode.Links.Add(new DfaNodeLink(newDfaNode, value));
-
                 DfaNode possibleSameDfaNode = previous
-                    .FirstOrDefault(pr => pr.NfaNodes.Intersect(newDfaNode.NfaNodes).Any());
-                if (possibleSameDfaNode != newDfaNode)
+                    .FirstOrDefault(pr => pr.NfaNodes.SequenceEqual(newDfaNode.NfaNodes));
+                if (possibleSameDfaNode != null)
                 {
                     dfaNode.Links.Add(new DfaNodeLink(possibleSameDfaNode, value));
 
-                    bool containLastNfaNode = newDfaNode.NfaNodes.Contains(lastNfaNode);
-                    newDfaNode.NfaNodes = newDfaNode.NfaNodes.Except(possibleSameDfaNode.NfaNodes).ToList();
-                    if (containLastNfaNode)
-                    {
-                        newDfaNode.NfaNodes.Add(lastNfaNode);
-                    }
+                    continue;
                 }
 
-                BuildDfaInternal(newDfaNode, lastNfaNode, previous);
+                previous.Add(newDfaNode);
+                dfaNode.Links.Add(new DfaNodeLink(newDfaNode, value));
+
+                BuildDfaInternal(newDfaNode, previous);
             }
         }
 
@@ -354,6 +349,7 @@ namespace CustomRegex
             }
 
             previous.Add(node);
+            Func<char, bool> matchСonditionClone = matchСondition;
 
             foreach (NfaNodeLink childNode in node.Links)
             {
@@ -362,7 +358,7 @@ namespace CustomRegex
                     values.Add(getValue(childNode));
                     if (addEpsCondition)
                     {
-                        matchСondition += c => c == EPS;
+                        matchСonditionClone += c => c == EPS;
                     }
                 }
                 else
@@ -375,7 +371,8 @@ namespace CustomRegex
                     continue;
                 }
 
-                GetValuesFromNfaNode<T>(childNode.NfaNode, matchСondition, getValue, addEpsCondition, values, previous);
+                GetValuesFromNfaNode<T>(childNode.NfaNode, matchСonditionClone, getValue, addEpsCondition, values,
+                    previous);
             }
 
             return values;
