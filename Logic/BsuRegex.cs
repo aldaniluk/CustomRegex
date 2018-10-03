@@ -381,6 +381,11 @@ namespace CustomRegex
         private void MarkIsFinal(DfaNode firstDfaNode, NfaNode nfaNode)
         {
             NfaNode lastNfaNode = GetLastNfaNode(nfaNode);
+            if (firstDfaNode.NfaNodes.Contains(lastNfaNode))
+            {
+                firstDfaNode.IsFinal = true;
+            }
+
             MarkIsFinalInternal(firstDfaNode, lastNfaNode);
         }
 
