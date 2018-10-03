@@ -1,0 +1,6 @@
+a a aaa b
+ab ab a b abb
+(a|b) a b ab aa
+ab* ab abbb aabb aab
+(a|b)* aabb bbbabababbabab aavbb
+ab*(cd|de)* acd abbbde acdde abcde
